@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class MogusPlayerControler : MonoBehaviour
@@ -8,16 +8,25 @@ public class MogusPlayerControler : MonoBehaviour
     private Rigidbody rb;
 
     [Header("Player Utils")]
+    
     [SerializeField]
     private float speed;
-    [SerializeField] 
+    [SerializeField]
     private float rotationSpeed = 10f;
-    
-    
+    [SerializeField]
+    private GameObject key;
     private Camera cam;
+    private PuertaControler puertaControler;
 
+    [Header("Shoot")]
+    [SerializeField]
+    private GameObject bulletPrefab;
+    [SerializeField]
+    private Transform bulletSpawnPoint;
+    [SerializeField]
+    private float bulletForce;
+    private bool isShooting;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -26,14 +35,14 @@ public class MogusPlayerControler : MonoBehaviour
         anim.SetBool("walk", false);
         anim.SetBool("idle", true);
         cam = Camera.main;
+        puertaControler = FindObjectOfType<PuertaControler>();
+
     }
 
-    // Update is called once per frame
     void Update()
     {
         Vector2 leftStickInput = playerInput.actions["Move"].ReadValue<Vector2>();
 
-        // Ejes globales en vez de transform.forward / transform.right
         Vector3 movement = (Vector3.forward * leftStickInput.y + Vector3.right * leftStickInput.x) * speed;
         rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
 
@@ -45,10 +54,37 @@ public class MogusPlayerControler : MonoBehaviour
         RotarPlayer();
     }
 
+
+    public void Shoot(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            isShooting = true;
+            SpawnBullet();
+        }
+        else if (context.canceled)
+        {
+            isShooting = false;
+        }
+    }
+
+    private void SpawnBullet()
+    {
+        GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation);
+        bullet.transform.localEulerAngles += new Vector3(0f, 90f, 0f);
+
+        Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
+
+        if (bulletRb != null)
+        {
+            bulletRb.linearVelocity = transform.forward * bulletForce;
+        }
+
+        
+    }
+
     private void RotarPlayer()
     {
-
-        //RayCast camara
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         Plane groundPlane = new Plane(Vector3.up, transform.position);
 
@@ -64,6 +100,14 @@ public class MogusPlayerControler : MonoBehaviour
                 rb.MoveRotation(Quaternion.Lerp(rb.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed));
             }
         }
+    }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject == key)
+        {
+            key.SetActive(false);
+            puertaControler.hasKey = true;
+        }
     }
 }

@@ -6,9 +6,9 @@ public class CameraMultiplayer : MonoBehaviour
 {
 
     public Transform targetPlayer;
-    [SerializeField]
-    private Transform camOffset;
-    
+    [SerializeField] 
+    private float camOffset;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -18,6 +18,6 @@ public class CameraMultiplayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //gameObject.transform.position = new Vector3 (targetPlayer.
+        gameObject.transform.position = new Vector3(targetPlayer.position.x, camOffset, targetPlayer.position.z);
     }
 }
