@@ -35,7 +35,7 @@ public class MogusPlayerControler : MonoBehaviour
         anim.SetBool("walk", false);
         anim.SetBool("idle", true);
         cam = Camera.main;
-        puertaControler = FindObjectOfType<PuertaControler>();
+        puertaControler = FindFirstObjectByType<PuertaControler>();
 
     }
 

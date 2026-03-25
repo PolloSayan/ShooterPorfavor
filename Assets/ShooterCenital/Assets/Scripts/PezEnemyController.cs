@@ -20,38 +20,61 @@ public class PezEnemyController : MonoBehaviour
     private Rigidbody rb;
     private Animator anim;
 
+    private bool isAttacking;
+    private bool isChasing;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
 
         if (player == null)
+        {
             player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        }
+
+        isChasing = true;
     }
 
     void Update()
     {
-
-        float distancia = Vector2.Distance(transform.position, player.position);
-
-        if (distancia > attackRange)
+        if (isChasing == true)
+        {
             Chase();
-        else
+        }
+        if (isAttacking == true)
+        {
             Attack();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject == player)
+        {
+            isAttacking = true;
+            isChasing = false;
+
+        }
+        else
+        { 
+            isAttacking = false;
+            isChasing = true;
+        }
     }
 
     void Chase()
     {
-        Vector2 direction = (player.position - transform.position).normalized;
+        Vector3 direction = (player.position - transform.position).normalized;
         rb.linearVelocity = direction * moveSpeed;
-
+        anim.SetBool("Running", true);
         attackTimer = 0f;
     }
 
     void Attack()
     {
-        rb.linearVelocity = Vector2.zero;
-
+        rb.linearVelocity = Vector3.zero;
+        anim.SetBool("Running", false);
         attackTimer -= Time.deltaTime;
         if (attackTimer <= 0f)
         {
